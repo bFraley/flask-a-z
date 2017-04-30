@@ -38,6 +38,36 @@ def connect_db():
     rv.row_factory = sqlite3.Row
     return rv
 
+# Init sqlite db, wrapped as Flask command below as initdb_command
+def init_db():
+    db = get_db()
+    with app.open_resource('schema.sql', mode='r') as f:
+        db.cursor().executescript(f.read())
+    db.commit()
+
+@app.cli.command('initdb')
+def initdb_command():
+    """Initializes the database."""
+    init_db()
+    print('Initialized the database.')
+
+
+"""
+ON ABOVE INIT AND INIT COMMAND
+The open_resource() method of the application object is a convenient helper function that will open a 
+resource that the application provides. This function opens a file from the resource location (the flaskr/flaskr folder)
+ and allows you to read from it. It is used in this example to execute a script on the database connection.
+
+The connection object provided by SQLite can give you a cursor object. On that cursor, there is a method to 
+execute a complete script. Finally, you only have to commit the changes. SQLite3 and other transactional 
+databases will not commit unless you explicitly tell it to.
+
+Now, it is possible to create a database with the flask script:
+
+flask initdb
+Initialized the database.
+"""
+
 def get_db():
     """Opens a new database connection if there is none yet for the
     current application context.
@@ -52,4 +82,3 @@ def close_db(error):
     """Closes the database again at the end of the request."""
     if hasattr(g, 'sqlite_db'):
         g.sqlite_db.close()
-        
