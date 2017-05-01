@@ -88,6 +88,12 @@ def close_db(error):
 
 # VIEWS
 
+# VIEW HELPER FUNCTIONS
+def not_loggedin(sess):
+    if not sess.get('logged_in'):
+       return True
+ 
+
 # HOME - gets posted entries
 @app.route('/')
 def show_entries():
@@ -100,14 +106,40 @@ def show_entries():
 # ADD A POST
 @app.route('/add', methods=['POST'])
 def add_entry():
-    if not session.get('logged_in'):
+
+    if not_loggedin(session):
         abort(401)
+
     db = get_db()
     db.execute('insert into entries (title, text) values (?, ?)',
                  [request.form['title'], request.form['text']])
     db.commit()
     flash('New entry was successfully posted')
     return redirect(url_for('show_entries'))
+
+
+#Post Item Listing
+@app.route('/list-item', methods=['GET', 'POST'])
+def add_listing():
+    if not_loggedin(session):
+        abort(401)
+
+    
+    db = get_db()
+    db.execute('insert into items (name, qty, year) values (?, ?, ?)',
+                [request.form['name'], request.form['qty'], request.form['year']])
+
+    db.commit()
+    flash('New Item Listed')
+    return redirect(url_for('show_items'))
+    
+
+@app.route('/items', methods=['GET', 'POST'])
+def show_items():
+    db = get_db()
+    cur = db.execute('select name, qty, year from items order by id desc')
+    items  = cur.fetchall()
+    return render_template('show_items.html', items=items)
 
 
 # LOGIN

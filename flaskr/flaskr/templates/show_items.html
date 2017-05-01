@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    {% if session.logged_in %}
+        <form action="{{ url_for('add_listing') }}" method=post class=add-entry>
+            <dl>
+                <dt>Name:
+                <dd><input type=text size=30 name=name>
+                <dt>Qt
+                <dd><input type=text size=8 name=qty>
+                <dt>Year
+                <dd><input type=text size=4 name=year>
+                <dd><input type=submit value=okay>
+            </dl>
+        </form>
+    {% endif %}
+
+    <ul class=entries>
+        {% for item in items %}
+            <li><h2>{{ item.name }}</h2>{{ item.qty|safe }}
+        {% else %}
+            <li><em>No items listed.</em>
+        {% endfor %}
+    </ul>
+
+{% endblock %}
